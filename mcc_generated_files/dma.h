@@ -813,28 +813,6 @@ void DMA_Channel0_CallBack(void);
 
 /**
   @Summary
-    Polled implementation
-
-  @Description
-    This routine is used to implement the tasks for polled implementations.
-  
-  @Preconditions
-    DMA_Initialize() function should have been 
-    called before calling this function.
- 
-  @Returns 
-    None
- 
-  @Param
-    None
- 
-  @Example
-    Refer to DMA_Initialize(); for an example
-    
-*/
-void DMA_Channel0_Tasks(void);
-/**
-  @Summary
     Callback for DMA Channel1.
 
   @Description

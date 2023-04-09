@@ -100,10 +100,10 @@ void PIN_MANAGER_Initialize (void)
      ***************************************************************************/
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
+    RPOR1bits.RP36R = 0x0018;    //RB4->CMP1:C1OUT
+    RPINR23bits.SS2R = 0x0029;    //RB9->SPI2:SS2IN
     RPINR22bits.SCK2R = 0x0028;    //RB8->SPI2:SCK2IN
     RPINR22bits.SDI2R = 0x0027;    //RB7->SPI2:SDI2
-    RPINR23bits.SS2R = 0x0029;    //RB9->SPI2:SS2IN
-    RPOR1bits.RP36R = 0x0018;    //RB4->CMP1:C1OUT
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock PPS
     

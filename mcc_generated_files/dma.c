@@ -71,6 +71,7 @@ void DMA_Initialize(void)
     // Clearing Channel 0 Interrupt Flag;
     IFS0bits.DMA0IF = false;
     // Enabling Channel 0 Interrupt
+    IEC0bits.DMA0IE = 1;
 
     // AMODE Register Indirect without Post-Increment mode; CHEN enabled; SIZE 16 bit; DIR Reads from peripheral address, writes to RAM address; NULLW enabled; HALF Initiates interrupt when all of the data has been moved; MODE Continuous, Ping-Pong modes are disabled; 
     DMA1CON= 0x8810 & 0x7FFF; //Enable DMA Channel later;
@@ -140,17 +141,14 @@ void DMA_Initialize(void)
 void __attribute__ ((weak)) DMA_Channel0_CallBack(void)
 {
     // Add your custom callback code here
+    TMR1 = 0;
 }
 
-void DMA_Channel0_Tasks( void )
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _DMA0Interrupt( void )
 {
-	if(IFS0bits.DMA0IF)
-	{
-		// DMA Channel0 callback function 
-		DMA_Channel0_CallBack();
-		
-		IFS0bits.DMA0IF = 0;
-	}
+	DMA_Channel0_CallBack();
+	
+    IFS0bits.DMA0IF = 0;
 }
 void __attribute__ ((weak)) DMA_Channel1_CallBack(void)
 {

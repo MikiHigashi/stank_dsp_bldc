@@ -145,7 +145,7 @@ uint16_t table_pwm[] = {
 
 
 
-uint8_t right;    // スロットル
+uint8_t right = 128; // スロットル
 
 # define MAX_BUF_I 4 /* motor_i 過去履歴バッファ数 */
 uint16_t motor_i; // 電流センサー値
@@ -378,10 +378,18 @@ void to_next_phase(void) {
 }
 
 
+// SPI受信欠落タイマー1
+// 0.1s ごと
+// SPI受信がないとここに来る
+void int_timer1(void) {
+    right = 128;
+}
+
+
 // 脱調対策タイマー2
 // 240ms ごと
 // 相変化が240ms以上発生しないとタイマー割り込みが発生しここに来る
-void int_timer(void) {
+void int_timer2(void) {
     if (acc != 128) {
         delay = 0;
         set_pwm(SMALL_DUTY);
@@ -420,7 +428,7 @@ int check_sensor(void) {
 
 
 // センサーエラー表示
-int show_sensor_error(void) {
+void show_sensor_error(void) {
     uint8_t i;
     char buf[20];
     
@@ -458,7 +466,8 @@ int main(void)
     DMA_StartAddressASet(DMA_CHANNEL_0, (uint16_t)(&right));        
     DMA_StartAddressASet(DMA_CHANNEL_1, (uint16_t)(&motor_i));        
     CN_SetInterruptHandler(int_pin);
-    TMR2_SetInterruptHandler(int_timer);
+    TMR1_SetInterruptHandler(int_timer1);
+    TMR2_SetInterruptHandler(int_timer2);
     TMR3_SetInterruptHandler(int_timer3);
 //    PWM_SetSpecialEventInterruptHandler(pwm_adc1);
 
@@ -470,6 +479,7 @@ int main(void)
     
     cw_ccw = pwm = delay = 0;
     acc = acc0 = 128;
+    TMR1_Start();
     TMR2_Start();
     TMR3_Stop();
     TMR4_Start();
@@ -575,7 +585,7 @@ int main(void)
 //        sprintf(buf, "%3u %3u", right, (PORTA >> 2) & 7);
 //        sprintf(buf, "%4u %4u %5u", motor_i, motor_if, pwm_if);
 //        LCD_i2C_data(buf);
-//        __delay_ms(20);
+        __delay_ms(10);
          
         acc0 = acc;
     }
