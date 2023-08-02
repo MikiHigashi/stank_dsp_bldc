@@ -155,8 +155,6 @@ uint16_t motor_i; // 電流センサー値
 // これ以下の DUTY にしない max 6400
 #define MIN_DUTY 1000 
 #define SMALL_DUTY 1000 
-// pwm がこれ以上になると電子進角を増やす（２ステップ先に切りかえる）
-#define ADVANCE_ANGLE 1500 
     
 uint8_t acc, acc0 = 128;
 
@@ -319,8 +317,8 @@ void int_timer3(void) {
     }
     
     if (cw_ccw == 1) { // 順回転
-        //if (pwm < ADVANCE_ANGLE) {
-        if (countValUpper > 1) {
+        if (acc < 150) {
+        //if (countValUpper > 1) {
             (table_int_fw_full[(PORTA >> 2) & 7])();
         }
         else {        
@@ -330,7 +328,6 @@ void int_timer3(void) {
         return;
     }
     if (cw_ccw) { // 逆回転
-        //if (pwm < ADVANCE_ANGLE) {
         if (countValUpper > 1) {
             (table_int_bk_full[(PORTA >> 2) & 7])();
         }
@@ -367,7 +364,7 @@ void int_pin(void) {
 // ホールセンサーを元に、次の相に移行
 void to_next_phase(void) {
     if (cw_ccw == 1) { // 順回転
-        (table_int_fw_full[(PORTA >> 2) & 7])();
+        (table_int_fw2_full[(PORTA >> 2) & 7])();
         return;
     }
     if (cw_ccw) { // 逆回転
@@ -469,7 +466,6 @@ int main(void)
     TMR1_SetInterruptHandler(int_timer1);
     TMR2_SetInterruptHandler(int_timer2);
     TMR3_SetInterruptHandler(int_timer3);
-//    PWM_SetSpecialEventInterruptHandler(pwm_adc1);
 
     WATCHDOG_TimerClear();
 
@@ -485,13 +481,13 @@ int main(void)
     TMR4_Start();
     WATCHDOG_TimerClear();
 
-  uint16_t cnt1 = 50; // 電源投入直後の不安定をパス
+    uint16_t cnt1 = 50; // 電源投入直後の不安定をパス
 
     // センサー安定待ち
     while (check_sensor() == 0) {
         show_sensor_error();
     }
-    
+  
     while (1)
     {
         set_pwm(pwm); // 電流値だけチェック
